@@ -1,0 +1,213 @@
+openapi: 3.1.0
+info:
+  title: Restroom API
+  description: API that allows for listing and reviewing restrooms for some location.
+  version: 0.0.1
+servers:
+  - url: 'http://localhost:8080'
+    description: "Testing server"
+paths:
+  /restrooms:
+    get:
+      summary: Returns list of all restrooms
+      operationId: restroom_list
+      parameters:
+        - name: around_location
+          in: query
+          required: true
+          description: User location
+          schema:
+            $ref: "#/components/schemas/Location"
+          style: "form"
+          explode: true
+        - name: after_distance
+          in: query
+          required: false
+          description: "distance >= minimum desired distance, for pagination"
+          schema:
+            type: number
+        - name: limit
+          in: query
+          required: false
+          description: "limit on results"
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+            default: 10
+      responses:
+        "200":
+          description: Success response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Restroom"
+        "401":
+          description: "Invalid authentication"
+    post:
+      summary: Submits a restroom
+      operationId: restroom_submit
+      security:
+        - device_key_auth: [ ]
+          api_key_auth: [ ]
+      requestBody:
+        description: "Restroom data to submit"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Restroom"
+      responses:
+        "200":
+          description: "Success response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Restroom"
+        "401":
+          description: "Invalid authentication"
+
+  /restrooms/{restroom_id}/reviews:
+    get:
+      summary: Returns list of reviews for some restroom
+      operationId: review_list
+      parameters:
+        - in: path
+          name: restroom_id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: "UUID of restroom to fetch"
+      responses:
+        "200":
+          description: "Success response"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - reviews
+                properties:
+                  self_review:
+                    $ref: "#/components/schemas/Review"
+                    description: "When authenticated, returns some review posted by the current user."
+                  reviews:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Review"
+        "404":
+          description: "Restroom not found"
+        "401":
+          description: "Invalid authentication"
+    post:
+      summary: "Submits a review for some restroom"
+      operationId: review_submit
+      security:
+        - device_key_auth: []
+          api_key_auth: []
+      parameters:
+        - in: path
+          name: restroom_id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: "UUID of restroom to post review to"
+      requestBody:
+        description: "Review data to submit"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Review"
+      responses:
+        "200":
+          description: "Success response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+        "404":
+          description: "Restroom not found"
+        "401":
+          description: "Invalid authentication"
+
+components:
+  securitySchemes:
+    api_key_auth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    device_key_auth:
+      type: http
+      scheme: bearer
+
+  schemas:
+    Location:
+      type: object
+      required:
+        - longitude
+        - latitude
+      properties:
+        latitude:
+          type: number
+          format: double
+          minimum: -90.0
+          maximum: 90.0
+        longitude:
+          type: number
+          format: double
+          minimum: -180.0
+          maximum: 180.0
+      example: {
+        "latitude": 33.19012,
+        "longitude": 96.99167
+      }
+    Rating:
+      type: number
+      format: float
+      minimum: 0.0
+      maximum: 5.0
+      description: "Rating value, typically fixed to 0.5 increments"
+    Restroom:
+      type: object
+      required:
+        - id
+        - title
+        - location
+        - review_average
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          example: "Building A, Second Floor"
+        location:
+          $ref: "#/components/schemas/Location"
+        review_average:
+          $ref: "#/components/schemas/Rating"
+          readOnly: true
+    Review:
+      type: object
+      required:
+        - id
+        - rating
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        rating:
+          $ref: "#/components/schemas/Rating"
+        body:
+          type: string
+
+security:
+  - api_key_auth: []
+  - device_key_auth: []
+    api_key_auth: []
