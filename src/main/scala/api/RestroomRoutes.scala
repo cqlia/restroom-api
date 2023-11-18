@@ -15,7 +15,7 @@ object RestroomRoutes:
     Method.GET / "restrooms" ->
       handler(
         Response.json(
-          List(Restroom(title = "dskmfldksmf"), Restroom(title = "fdsfdsf")).toJson
+          "[]"
         )
       ),
 

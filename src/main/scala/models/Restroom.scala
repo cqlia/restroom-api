@@ -3,7 +3,16 @@ package models
 
 import zio.json.*
 
-case class Restroom(title: String)
+import java.util.UUID
+
+final case class Restroom(
+  id: UUID,
+  title: String,
+  description: Option[String],
+  location: Location,
+  @jsonField("review_average")
+  reviewAverage: Float
+)
 
 object Restroom:
   implicit val decoder: JsonDecoder[Restroom] = DeriveJsonDecoder.gen[Restroom]
