@@ -12,7 +12,7 @@ paths:
       summary: Returns list of all restrooms
       operationId: restroom_list
       parameters:
-        - name: around_location
+        - name: around
           in: query
           required: true
           description: User location
@@ -20,21 +20,6 @@ paths:
             $ref: "#/components/schemas/Location"
           style: "form"
           explode: true
-        - name: after_distance
-          in: query
-          required: false
-          description: "distance >= minimum desired distance, for pagination"
-          schema:
-            type: number
-        - name: limit
-          in: query
-          required: false
-          description: "limit on results"
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 10
-            default: 10
       responses:
         "200":
           description: Success response
@@ -148,6 +133,7 @@ components:
   schemas:
     Location:
       type: object
+      description: Describes a location by coordinate pair.
       required:
         - longitude
         - latitude
@@ -169,11 +155,12 @@ components:
     Rating:
       type: number
       format: float
+      description: Rating value, typically fixed to 0.5 increments.
       minimum: 0.0
       maximum: 5.0
-      description: "Rating value, typically fixed to 0.5 increments"
     Restroom:
       type: object
+      description: Describes an instance of a restroom.
       required:
         - id
         - title
@@ -192,8 +179,12 @@ components:
         review_average:
           $ref: "#/components/schemas/Rating"
           readOnly: true
+        description:
+          type: string
+          example: "Located on the second floor, this restroom has an uncountable number of entrances."
     Review:
       type: object
+      description: Describes a review for some restroom object.
       required:
         - id
         - rating
