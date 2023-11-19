@@ -1,32 +1,71 @@
 package app
 package api
 
-import zio.Scope
-import zio.test.*
-import zio.http.*
+import zio.*
 import zio.http.Header.ContentType
+import zio.http.*
 import zio.http.endpoint.Endpoint
+import zio.json.*
+import zio.mock.Expectation.*
 import zio.test.Assertion.*
+import zio.test.*
+
+import java.util.UUID
+
+import database.RestroomServiceMock
+import models.{Location, Restroom, RestroomService}
 
 object RestroomRoutesSpec extends ZIOSpecDefault:
-  val specs: Spec[Any, Nothing] = suite("api"):
-    suite("listing")(
-      test("root ok status") {
-        for
-          response <- RestroomRoutes.app.runZIO(
-            Request.get(URL(Root))
-          )
-          responseStatus = response.status
-        yield assertTrue(responseStatus == Status.Ok)
-      },
-      test("root is png") {
-        for
-          response <- RestroomRoutes.app.runZIO(
-            Request.get(URL(Root))
-          )
-          responseType = response.headers.get(Header.ContentType).get.mediaType
-        yield assertTrue(responseType == MediaType.forFileExtension("png").get)
-      }
-    )
+  private val restroomA = Restroom(
+    id = UUID.fromString("79316cfe-3455-4f73-9a21-5ec642ad5b06"),
+    title = "Restroom A",
+    description = None,
+    location = Location(25.0, 15.0),
+    reviewAverage = 5.0
+  )
 
-  override def spec: Spec[Any, Nothing] = specs.provide()
+  private val getListingMock: ULayer[RestroomService] = RestroomServiceMock.List(
+    equalTo(restroomA.location),
+    value(List(restroomA))
+  )
+
+  private val emptyMock: ULayer[RestroomService] = RestroomServiceMock.empty
+
+  override def spec: Spec[Any, Throwable] = suite("restroom routes")(
+    suite("listing")(
+      test("location parsing") {
+        for {
+          responseA <- RestroomRoutes.app.runZIO(
+            Request.get(
+              URL(
+                Root / "restrooms",
+                queryParams = QueryParams(
+                  "latitude" -> restroomA.location.latitude.toString,
+                  "longitude" -> restroomA.location.longitude.toString
+                )
+              )
+            )
+          )
+
+          bodyA <- responseA.body.asString
+          expectedA = List(restroomA).toJson
+        } yield assertTrue(bodyA == expectedA)
+      }.provide(getListingMock),
+      test("missing parameter") {
+        for {
+          response <- RestroomRoutes.app.runZIO(
+            Request.get(
+              URL(
+                Root / "restrooms",
+                queryParams = QueryParams(
+                  "latitude" -> 100.0.toString
+                )
+              )
+            )
+          )
+
+          responseStatus = response.status
+        } yield assertTrue(responseStatus == Status.BadRequest)
+      }.provide(emptyMock)
+    )
+  )

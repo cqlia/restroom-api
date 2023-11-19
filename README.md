@@ -18,8 +18,9 @@ I don't know.
 
 ## License
 
-This code is licensed under the zero-clause BSD license, which can be found [here](LICENSE.txt).
+This code is licensed under the [zero-clause BSD license](LICENSE.txt).
 Using this backend for a school project is **not** advised if you happen to have the same professor as me.
 
+Structure heavily based off the [zio-scala3-quickstart](https://github.com/ScalaConsultants/zio-scala3-quickstart.g8/tree/master).
+
 This code is unmaintained and should be used as a reference at best.
-Given that this appears to be one of the very few projects available using the latest versions of the ZIO stack (a very painful realization), it could be helpful.

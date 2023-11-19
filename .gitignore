@@ -2,6 +2,8 @@ project/project/
 project/target/
 target/
 
+application.conf
+
 *.log
 *.iml
 *.ipr
