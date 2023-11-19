@@ -29,6 +29,7 @@ object DbRestroom:
       latitude = x.latitude,
       longitude = x.longitude
     ),
+    distance = x.distance,
     reviewAverage = x.reviewAverage
   )
 
@@ -67,7 +68,7 @@ class RestroomRepositoryLive(quill: Quill.Postgres[Literal]) extends RestroomRep
       .refineOrDie { case e: SQLException =>
         RepositoryError(e)
       }
-      .map(r => r.map(DbRestroom.asRestroom))
+      .map(_.map(DbRestroom.asRestroom))
 
 object RestroomRepositoryLive:
   val layer: URLayer[Quill.Postgres[Literal], RestroomRepository] = ZLayer {

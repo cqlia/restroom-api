@@ -10,6 +10,7 @@ final case class Restroom(
   title: String,
   description: Option[String],
   location: Location,
+  distance: Double,
   @jsonField("review_average")
   reviewAverage: Float
 )

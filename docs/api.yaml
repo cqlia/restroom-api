@@ -29,6 +29,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Restroom"
+        "400":
+          description: "Missing parameters"
         "401":
           description: "Invalid authentication"
     post:
@@ -51,6 +53,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Restroom"
+        "400":
+          description: "Missing parameters"
         "401":
           description: "Invalid authentication"
 
@@ -115,6 +119,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Review"
+        "400":
+          description: "Missing parameters"
         "404":
           description: "Restroom not found"
         "401":
@@ -166,6 +172,7 @@ components:
         - title
         - location
         - review_average
+        - distance
       properties:
         id:
           type: string
@@ -179,6 +186,11 @@ components:
         review_average:
           $ref: "#/components/schemas/Rating"
           readOnly: true
+        distance:
+          type: number
+          format: double
+          readOnly: true
+          description: "Distance of restroom from given point, in miles."
         description:
           type: string
           example: "Located on the second floor, this restroom has an uncountable number of entrances."
