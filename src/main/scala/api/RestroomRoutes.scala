@@ -1,7 +1,6 @@
 package app
 package api
 
-import app.models.RestroomService
 import zio.*
 import zio.http.*
 import zio.json.*
