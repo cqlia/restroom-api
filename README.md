@@ -1,4 +1,4 @@
-# Bathroom App API
+# Restroom App API
 
 Backend API for a class project, which utilized an app to manage a list of restrooms.
 

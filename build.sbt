@@ -12,7 +12,7 @@ inThisBuild(
 
 lazy val root = (project in file("."))
   .settings(
-    name := "bathroom-app",
+    name := "restroom-app",
     idePackagePrefix := Some("app")
   )
 
