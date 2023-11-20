@@ -45,7 +45,6 @@ class RestroomRepositoryLive(quill: Quill.Postgres[Literal]) extends RestroomRep
   override def list(around: Location): IO[RepositoryError, List[Restroom]] =
     val effect: IO[SQLException, List[DbRestroom]] = run {
       quote {
-        //
         sql"""SELECT restrooms.id, title, description,
                     COALESCE(AVG(reviews.rating), 0) AS reviewAverage,
                     ST_X(location) as longitude, ST_Y(location) as latitude,

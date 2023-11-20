@@ -20,6 +20,7 @@ object RestroomRoutesSpec extends ZIOSpecDefault:
     id = UUID.fromString("79316cfe-3455-4f73-9a21-5ec642ad5b06"),
     title = "Restroom A",
     description = None,
+    distance = 0.1,
     location = Location(25.0, 15.0),
     reviewAverage = 5.0
   )

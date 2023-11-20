@@ -14,6 +14,7 @@ import java.io.File
 
 import api.{BaseRoutes, RestroomRoutes}
 import database.{RestroomRepositoryLive, RestroomServiceLive}
+import application.*
 
 object Main extends ZIOAppDefault:
   private val configProvider: ConfigProvider = TypesafeConfigProvider.fromTypesafeConfig(
@@ -24,7 +25,7 @@ object Main extends ZIOAppDefault:
     Runtime.removeDefaultLoggers >>> Runtime.setConfigProvider(configProvider)
       >>> consoleLogger() >+> Slf4jBridge.initialize
 
-  private val app = RestroomRoutes.app ++ BaseRoutes.app
+  private val app = RestroomRoutes.app @@ apiKeyMiddleware ++ BaseRoutes.app
 
   private val dataSourceLayer = Quill.DataSource.fromPrefix("db")
   private val postgresLayer = Quill.Postgres.fromNamingStrategy(Literal)
