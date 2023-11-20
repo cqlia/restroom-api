@@ -22,6 +22,7 @@ val zioConfigVersion = "4.0.0-RC16"
 
 libraryDependencies ++= Seq(
   "dev.zio" %% "zio" % zioVersion,
+  "dev.zio" %% "zio-streams" % zioVersion,
   "dev.zio" %% "zio-http" % "3.0.0-RC3",
   "dev.zio" %% "zio-logging" % zioLoggingVersion,
   "dev.zio" %% "zio-logging-slf4j2-bridge" % zioLoggingVersion,

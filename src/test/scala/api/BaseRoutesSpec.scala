@@ -20,8 +20,11 @@ object BaseRoutesSpec extends ZIOSpecDefault:
           response <- BaseRoutes.app.runZIO(
             Request.get(URL(Root))
           )
-          responseType = response.headers.get(Header.ContentType).get.mediaType
-        yield assertTrue(responseType == MediaType.forFileExtension("png").get)
+          responseType = response.headers.get(Header.ContentType)
+        yield assertTrue(responseType match
+          case Some(headerType) => headerType.mediaType == MediaType.image.png
+          case _                => false
+        )
       }
     )
   ).provide()
