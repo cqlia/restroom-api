@@ -9,3 +9,4 @@ sealed trait DomainError(message: String) extends Throwable
   */
 final case class RepositoryError(cause: Throwable) extends DomainError(message = cause.getMessage)
 final case class RequestError(message: String) extends DomainError(message = message)
+final case class NotFoundError() extends DomainError(message = "item not found")

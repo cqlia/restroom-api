@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS reviews (
     restroom_id uuid NOT NULL,
     rating float NOT NULL,
     body text,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    created_by text NOT NULL,
 
     CONSTRAINT fk_restroom FOREIGN KEY(restroom_id) REFERENCES restrooms(id)
 );

@@ -5,6 +5,8 @@ import zio.*
 import zio.http.*
 import zio.json.*
 
+import java.util.UUID
+
 import models.*
 
 object RestroomRoutes:
@@ -22,8 +24,22 @@ object RestroomRoutes:
               r => ZIO.succeed(Response.json(r.toJson))
             )
           case _ => handleError(RequestError("missing parameters"))
+      },
+    Method.GET / "restrooms" / string("restroomId") / "reviews" ->
+      handler { (restroomId: String, _: Request) =>
+        parseUUID(restroomId) match
+          case Some(restroomUuid) =>
+            val effect = RestroomService.reviews(restroomUuid)
+            effect.foldZIO(
+              handleError,
+              r => ZIO.succeed(Response.json(r.toJson))
+            )
+          case None => handleError(NotFoundError())
       }
   ).sandbox.toHttpApp
+
+  private def parseUUID(value: String): Option[UUID] = try Some(UUID.fromString(value))
+  catch case iae: IllegalArgumentException => None
 
   private def handleError(err: DomainError): UIO[Response] = err match {
     case RepositoryError(cause) =>
@@ -33,4 +49,6 @@ object RestroomRoutes:
         )
     case RequestError(message) =>
       ZIO.succeed(Response.text(message).status(Status.BadRequest))
+    case NotFoundError() =>
+      ZIO.succeed(Response.text("item not found").status(Status.NotFound))
   }

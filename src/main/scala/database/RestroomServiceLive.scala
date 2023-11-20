@@ -20,6 +20,14 @@ class RestroomServiceLive(restroomRepository: RestroomRepository) extends Restro
     ) ZIO.fail(RequestError("location out of bounds"))
     else restroomRepository.list(around)
 
+  override def reviews(restroomId: UUID): IO[DomainError, List[Review]] =
+    ZIO.ifZIO(
+      restroomRepository.byId(restroomId).map(_.isDefined)
+    )(
+      onTrue = restroomRepository.reviews(restroomId),
+      onFalse = ZIO.fail(NotFoundError())
+    )
+
 object RestroomServiceLive:
   val layer: URLayer[RestroomRepository, RestroomService] = ZLayer(
     for {

@@ -43,7 +43,7 @@ class RestroomRepositoryLive(quill: Quill.Postgres[Literal]) extends RestroomRep
   override def add(data: AddRestroomData): IO[RepositoryError, UUID] = ZIO.fail(null)
 
   override def list(around: Location): IO[RepositoryError, List[Restroom]] =
-    val effect: IO[SQLException, List[DbRestroom]] = run {
+    val effect: IO[SQLException, List[Restroom]] = run {
       quote {
         sql"""SELECT restrooms.id, title, description,
                     COALESCE(AVG(reviews.rating), 0) AS reviewAverage,
@@ -59,7 +59,7 @@ class RestroomRepositoryLive(quill: Quill.Postgres[Literal]) extends RestroomRep
                      3857)
                     ) * cosd(ST_Y(location)) * 0.0006213712 AS distance
              FROM restrooms LEFT JOIN reviews ON restrooms.id = reviews.restroom_id
-             GROUP BY restrooms.id ORDER BY distance""".as[Query[DbRestroom]]
+             GROUP BY restrooms.id ORDER BY distance""".as[Query[Restroom]]
       }
     }
 
@@ -67,7 +67,40 @@ class RestroomRepositoryLive(quill: Quill.Postgres[Literal]) extends RestroomRep
       .refineOrDie { case e: SQLException =>
         RepositoryError(e)
       }
-      .map(_.map(DbRestroom.asRestroom))
+
+  override def reviews(restroomId: UUID): IO[RepositoryError, List[Review]] =
+    val effect: IO[SQLException, List[Review]] = run {
+      quote {
+        // created_at is not exposed so custom SQL is necessary here
+        sql"""SELECT id, rating, body FROM reviews WHERE restroom_id = ${lift(
+            restroomId
+          )} ORDER BY created_at DESC"""
+          .as[Query[Review]]
+      }
+    }
+
+    effect.refineOrDie { case e: SQLException =>
+      RepositoryError(e)
+    }
+
+  override def byId(id: UUID): IO[RepositoryError, Option[Restroom]] =
+    val effect: IO[SQLException, List[Restroom]] = run {
+      quote {
+        // this is a one-off function, but having 0 as distance is not the most ideal
+        sql"""SELECT restrooms.id, title, description,
+            COALESCE(AVG(reviews.rating), 0) AS reviewAverage,
+            ST_X(location) as longitude, ST_Y(location) as latitude, 0.0 AS distance
+            FROM restrooms LEFT JOIN reviews ON restrooms.id = reviews.restroom_id
+            WHERE restrooms.id = ${lift(id)} GROUP BY restrooms.id ORDER BY distance"""
+          .as[Query[Restroom]]
+      }
+    }
+
+    effect
+      .map(_.headOption)
+      .refineOrDie { case e: SQLException =>
+        RepositoryError(e)
+      }
 
 object RestroomRepositoryLive:
   val layer: URLayer[Quill.Postgres[Literal], RestroomRepository] = ZLayer {

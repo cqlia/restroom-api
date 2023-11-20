@@ -76,17 +76,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - reviews
-                properties:
-                  self_review:
-                    $ref: "#/components/schemas/Review"
-                    description: "When authenticated, returns some review posted by the current user."
-                  reviews:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Review"
+                type: array
+                items:
+                  $ref: "#/components/schemas/Review"
         "404":
           description: "Restroom not found"
         "401":

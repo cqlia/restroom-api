@@ -13,7 +13,7 @@ import zio.test.*
 import java.util.UUID
 
 import database.RestroomServiceMock
-import models.{Location, Restroom, RestroomService}
+import models.{Location, Restroom, RestroomService, Review}
 
 object RestroomRoutesSpec extends ZIOSpecDefault:
   private val restroomA = Restroom(
@@ -25,12 +25,23 @@ object RestroomRoutesSpec extends ZIOSpecDefault:
     reviewAverage = 5.0
   )
 
+  private val reviewA = Review(
+    id = UUID.fromString("fef3f44a-75bb-45e9-a2e1-2720e07fbcc3"),
+    rating = 5.0,
+    body = None
+  )
+
   private val getListingMock: ULayer[RestroomService] = RestroomServiceMock.List(
     equalTo(restroomA.location),
     value(List(restroomA))
   )
 
   private val emptyMock: ULayer[RestroomService] = RestroomServiceMock.empty
+
+  private val getReviewsMock: ULayer[RestroomService] = RestroomServiceMock.Reviews(
+    equalTo(restroomA.id),
+    value(List(reviewA))
+  )
 
   override def spec: Spec[Any, Throwable] = suite("restroom routes")(
     suite("listing")(
@@ -67,6 +78,25 @@ object RestroomRoutesSpec extends ZIOSpecDefault:
 
           responseStatus = response.status
         } yield assertTrue(responseStatus == Status.BadRequest)
+      }.provide(emptyMock),
+      test("review listing") {
+        for {
+          response <- RestroomRoutes.app.runZIO(
+            Request.get(URL(Root / "restrooms" / restroomA.id.toString / "reviews"))
+          )
+
+          body <- response.body.asString
+          expected = List(reviewA).toJson
+        } yield assertTrue(body == expected)
+      }.provide(getReviewsMock),
+      test("invalid id reviews") {
+        for {
+          response <- RestroomRoutes.app.runZIO(
+            Request.get(URL(Root / "restrooms" / "invalid" / "reviews"))
+          )
+
+          status = response.status
+        } yield assertTrue(status == Status.NotFound)
       }.provide(emptyMock)
     )
   )

@@ -21,11 +21,22 @@ trait RestroomRepository:
     *
     * @param around
     *   Location used for ordering
-    * @return
     */
   def list(
     around: Location
   ): IO[RepositoryError, List[Restroom]]
+
+  /** Fetches a restroom from its UUID.
+    * @param id
+    *   Reference UUID for restroom
+    */
+  def byId(id: UUID): IO[RepositoryError, Option[Restroom]]
+
+  /** Returns a list of all reviews for some restroom, ordered by creation time.
+    * @param restroomId
+    *   Reference UUID for restroom
+    */
+  def reviews(restroomId: UUID): IO[RepositoryError, List[Review]]
 
 object RestroomRepository:
   def add(data: AddRestroomData): ZIO[RestroomRepository, RepositoryError, UUID] =
@@ -35,3 +46,9 @@ object RestroomRepository:
     around: Location
   ): ZIO[RestroomRepository, RepositoryError, List[Restroom]] =
     ZIO.serviceWithZIO[RestroomRepository](_.list(around))
+
+  def byId(id: UUID): ZIO[RestroomRepository, RepositoryError, Option[Restroom]] =
+    ZIO.serviceWithZIO[RestroomRepository](_.byId(id))
+
+  def reviews(restroomId: UUID): ZIO[RestroomRepository, RepositoryError, List[Review]] =
+    ZIO.serviceWithZIO[RestroomRepository](_.reviews(restroomId))
