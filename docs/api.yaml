@@ -108,7 +108,7 @@ paths:
         "204":
           description: "Success response"
         "400":
-          description: "Missing parameters"
+          description: "Missing parameters or duplicate review"
         "404":
           description: "Restroom not found"
         "401":

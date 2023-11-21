@@ -1,7 +1,7 @@
 package app
 package api
 
-import app.application.*
+import application.*
 import zio.*
 import zio.http.*
 import zio.json.*
@@ -52,10 +52,17 @@ object RestroomRoutes:
           parseUUID(restroomId) match
             case Some(restroomUuid) =>
               val reviewData = parseBody[AddReviewData](request.body)
-              val effect = reviewData.flatMap(d => RestroomService.addReview(restroomUuid, d))
+              val effect = reviewData.flatMap(d =>
+                RestroomService.addReview(
+                  restroomUuid,
+                  d,
+                  context.key
+                )
+              )
+
               effect.foldZIO(
                 handleError,
-                r => ZIO.succeed(Response.json(r.toJson))
+                _ => ZIO.succeed(Response.status(Status.NoContent))
               )
             case None => handleError(NotFoundError())
       }

@@ -10,20 +10,25 @@ import java.util.UUID
 import models.*
 
 // schema methods seem a little broken currently, so manual it is
-private def tupleToRestroom(
-  t: (UUID, String, Option[String], Float, Double, Double, Option[Double])
-): Restroom =
-  Restroom(
-    id = t._1,
-    title = t._2,
-    description = t._3,
-    reviewAverage = t._4,
-    location = Location(
-      longitude = t._5,
-      latitude = t._6
-    ),
-    distance = t._7
-  )
+type UnpackedRestroom = (UUID, String, Option[String], Float, Double, Double, Option[Double])
+private def tupleToRestroom(t: UnpackedRestroom): Restroom = Restroom(
+  id = t._1,
+  title = t._2,
+  description = t._3,
+  reviewAverage = t._4,
+  location = Location(
+    longitude = t._5,
+    latitude = t._6
+  ),
+  distance = t._7
+)
+
+type UnpackedReview = (UUID, Float, Option[String])
+private def tupleToReview(r: UnpackedReview): Review = Review(
+  id = r._1,
+  rating = r._2,
+  body = r._3
+)
 
 class RestroomRepositoryLive(connectionPool: ZConnectionPool) extends RestroomRepository:
   import connectionPool.*
@@ -41,8 +46,8 @@ class RestroomRepositoryLive(connectionPool: ZConnectionPool) extends RestroomRe
     effect
       .refineOrDie { case e: Throwable =>
         RepositoryError(e)
-      // this should only ever return one value, if it's missing then something's broken
       }
+      // this should only ever return one value, if it's missing then something's broken
       .map(_.updatedKeys.head)
 
   override def list(around: Location): IO[RepositoryError, List[Restroom]] =
@@ -62,7 +67,7 @@ class RestroomRepositoryLive(connectionPool: ZConnectionPool) extends RestroomRe
                   ) * cosd(ST_Y(location)) * 0.0006213712 AS distance
            FROM restrooms LEFT JOIN reviews ON restrooms.id = reviews.restroom_id
            GROUP BY restrooms.id ORDER BY distance"""
-        .query[(UUID, String, Option[String], Float, Double, Double, Option[Double])]
+        .query[UnpackedRestroom]
         .selectAll
     }
 
@@ -75,7 +80,7 @@ class RestroomRepositoryLive(connectionPool: ZConnectionPool) extends RestroomRe
   override def reviews(restroomId: UUID): IO[RepositoryError, List[Review]] =
     val effect = transaction {
       sql"SELECT id, rating, body FROM reviews WHERE restroom_id = $restroomId ORDER BY created_at DESC"
-        .query[(UUID, Float, Option[String])]
+        .query[UnpackedReview]
         .selectAll
     }
 
@@ -83,16 +88,7 @@ class RestroomRepositoryLive(connectionPool: ZConnectionPool) extends RestroomRe
       .refineOrDie { case e: Throwable =>
         RepositoryError(e)
       }
-      .map(
-        _.toList
-          .map(r =>
-            Review(
-              id = r._1,
-              rating = r._2,
-              body = r._3
-            )
-          )
-      )
+      .map(_.toList.map(tupleToReview))
 
   override def byId(id: UUID): IO[RepositoryError, Option[Restroom]] =
     val effect = transaction {
@@ -102,7 +98,7 @@ class RestroomRepositoryLive(connectionPool: ZConnectionPool) extends RestroomRe
           ST_X(location) as longitude, ST_Y(location) as latitude, NULL AS distance
           FROM restrooms LEFT JOIN reviews ON restrooms.id = reviews.restroom_id
           WHERE restrooms.id = $id GROUP BY restrooms.id"""
-        .query[(UUID, String, Option[String], Float, Double, Double, Option[Double])]
+        .query[UnpackedRestroom]
         .selectOne
     }
 
@@ -112,8 +108,38 @@ class RestroomRepositoryLive(connectionPool: ZConnectionPool) extends RestroomRe
       }
       .map(_.map(tupleToRestroom))
 
-  override def addReview(restroomId: UUID, data: AddReviewData): IO[RepositoryError, UUID] =
-    ZIO.fail(null)
+  override def addReview(
+    restroomId: UUID,
+    data: AddReviewData,
+    authorId: String
+  ): IO[RepositoryError, UUID] =
+    val effect = transaction {
+      sql"""INSERT INTO reviews (restroom_id, rating, body, created_by) VALUES (
+           $restroomId, ${data.rating}, ${data.body}, $authorId
+         ) RETURNING id;""".insertReturning[UUID]
+    }
+
+    effect
+      .refineOrDie { case e: Throwable =>
+        RepositoryError(e)
+      }
+      .map(_.updatedKeys.head)
+
+  override def reviewByAuthor(
+    restroomId: UUID,
+    authorId: String
+  ): IO[RepositoryError, Option[Review]] =
+    val effect = transaction {
+      sql"""SELECT id, rating, body FROM reviews WHERE restroom_id = $restroomId AND created_by = $authorId;"""
+        .query[UnpackedReview]
+        .selectOne
+    }
+
+    effect
+      .refineOrDie { case e: Throwable =>
+        RepositoryError(e)
+      }
+      .map(_.map(tupleToReview))
 
 object RestroomRepositoryLive:
   val layer: URLayer[ZConnectionPool, RestroomRepository] = ZLayer {

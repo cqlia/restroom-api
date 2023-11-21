@@ -15,7 +15,7 @@ object RestroomServiceMock extends Mock[RestroomService]:
 
   object Reviews extends Effect[UUID, Nothing, List[Review]]
 
-  object AddReview extends Effect[(UUID, AddReviewData), Nothing, UUID]
+  object AddReview extends Effect[(UUID, AddReviewData, String), Nothing, UUID]
 
   override val compose: URLayer[Proxy, RestroomService] =
     ZLayer.fromFunction((proxy: Proxy) =>
@@ -28,7 +28,11 @@ object RestroomServiceMock extends Mock[RestroomService]:
         override def reviews(restroomId: UUID): IO[DomainError, List[Review]] =
           proxy(Reviews, restroomId)
 
-        override def addReview(restroomId: UUID, data: AddReviewData): IO[DomainError, UUID] =
-          proxy(AddReview, (restroomId, data))
+        override def addReview(
+          restroomId: UUID,
+          data: AddReviewData,
+          authorId: String
+        ): IO[DomainError, UUID] =
+          proxy(AddReview, (restroomId, data, authorId))
       }
     )

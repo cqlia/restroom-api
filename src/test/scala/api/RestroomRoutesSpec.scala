@@ -54,6 +54,13 @@ object RestroomRoutesSpec extends ZIOSpecDefault:
     value(restroomA)
   )
 
+  private val addReviewA = AddReviewData(rating = 5.0, body = None)
+
+  private val addReviewMock: ULayer[RestroomService] = RestroomServiceMock.AddReview(
+    equalTo(restroomA.id, addReviewA, "test"),
+    value(reviewA.id)
+  )
+
   override def spec: Spec[Any, Throwable] = suite("restroom routes")(
     suite("listing")(
       test("location parsing") {
@@ -122,7 +129,7 @@ object RestroomRoutesSpec extends ZIOSpecDefault:
           responseStatus = response.status
         } yield assertTrue(responseStatus == Status.Unauthorized)
       }.provide(emptyMock),
-      test("body reading") {
+      test("success path") {
         val sentBody = restroomDataA.toJson
 
         for {
@@ -135,7 +142,18 @@ object RestroomRoutesSpec extends ZIOSpecDefault:
           body <- response.body.asString
           expectedBody = restroomA.toJson
         } yield assertTrue(body == expectedBody)
-      }.provide(addRestroomMock)
+      }.provide(addRestroomMock),
+      test("invalid body") {
+        for {
+          response <- RestroomRoutes.app.runZIO(
+            Request
+              .post(URL(Root / "restrooms"), Body.empty)
+              .addHeaders(Headers(Header.Authorization.Bearer("test")))
+          )
+
+          status = response.status
+        } yield assertTrue(status == Status.BadRequest)
+      }.provide(emptyMock)
     ),
     suite("review posting")(
       test("invalid id reviews") {
@@ -148,6 +166,33 @@ object RestroomRoutesSpec extends ZIOSpecDefault:
 
           status = response.status
         } yield assertTrue(status == Status.NotFound)
-      }.provide(emptyMock)
+      }.provide(emptyMock),
+      test("invalid body") {
+        for {
+          response <- RestroomRoutes.app.runZIO(
+            Request
+              .post(URL(Root / "restrooms" / restroomA.id.toString / "reviews"), Body.empty)
+              .addHeaders(Headers(Header.Authorization.Bearer("test")))
+          )
+
+          status = response.status
+        } yield assertTrue(status == Status.BadRequest)
+      }.provide(emptyMock),
+      test("success path") {
+        val body = addReviewA.toJson
+
+        for {
+          response <- RestroomRoutes.app.runZIO(
+            Request
+              .post(
+                URL(Root / "restrooms" / restroomA.id.toString / "reviews"),
+                Body.fromString(body)
+              )
+              .addHeaders(Headers(Header.Authorization.Bearer("test")))
+          )
+
+          status = response.status
+        } yield assertTrue(status == Status.NoContent)
+      }.provide(addReviewMock)
     )
   )

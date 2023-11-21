@@ -12,7 +12,7 @@ trait RestroomService:
 
   def reviews(restroomId: UUID): IO[DomainError, List[Review]]
 
-  def addReview(restroomId: UUID, data: AddReviewData): IO[DomainError, UUID]
+  def addReview(restroomId: UUID, data: AddReviewData, authorId: String): IO[DomainError, UUID]
 
 object RestroomService:
   def add(data: AddRestroomData): ZIO[RestroomService, DomainError, Restroom] =
@@ -24,5 +24,9 @@ object RestroomService:
   def reviews(restroomId: UUID): ZIO[RestroomService, DomainError, List[Review]] =
     ZIO.serviceWithZIO[RestroomService](_.reviews(restroomId))
 
-  def addReview(restroomId: UUID, data: AddReviewData): ZIO[RestroomService, DomainError, UUID] =
-    ZIO.serviceWithZIO[RestroomService](_.addReview(restroomId, data))
+  def addReview(
+    restroomId: UUID,
+    data: AddReviewData,
+    authorId: String
+  ): ZIO[RestroomService, DomainError, UUID] =
+    ZIO.serviceWithZIO[RestroomService](_.addReview(restroomId, data, authorId))

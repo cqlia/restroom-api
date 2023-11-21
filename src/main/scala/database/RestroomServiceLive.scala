@@ -29,13 +29,18 @@ class RestroomServiceLive(restroomRepository: RestroomRepository) extends Restro
       onFalse = ZIO.fail(NotFoundError())
     )
 
-  override def addReview(restroomId: UUID, data: AddReviewData): IO[DomainError, UUID] =
+  override def addReview(
+    restroomId: UUID,
+    data: AddReviewData,
+    authorId: String
+  ): IO[DomainError, UUID] =
     if (data.rating > 5 || data.rating < 0) ZIO.fail(RequestError("rating out of bounds"))
     else
-      ZIO.ifZIO(
-        restroomRepository.byId(restroomId).map(_.isDefined)
-      )(
-        onTrue = restroomRepository.addReview(restroomId, data),
+      ZIO.ifZIO(restroomRepository.byId(restroomId).map(_.isDefined))(
+        onTrue = ZIO.ifZIO(restroomRepository.reviewByAuthor(restroomId, authorId).map(_.isEmpty))(
+          onTrue = restroomRepository.addReview(restroomId, data, authorId),
+          onFalse = ZIO.fail(RequestError("User already created review"))
+        ),
         onFalse = ZIO.fail(NotFoundError())
       )
 

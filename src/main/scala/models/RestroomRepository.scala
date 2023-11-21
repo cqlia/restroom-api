@@ -41,10 +41,20 @@ trait RestroomRepository:
     *   Reference UUID for restroom
     * @param data
     *   Information describing the review to be added
+    * @param authorId
+    *   Device key of the review author.
     * @return
     *   UUID of the created review
     */
-  def addReview(restroomId: UUID, data: AddReviewData): IO[RepositoryError, UUID]
+  def addReview(restroomId: UUID, data: AddReviewData, authorId: String): IO[RepositoryError, UUID]
+
+  /** Fetches a review by its author and associated restroom.
+    * @param restroomId
+    *   Reference UUID for restroom
+    * @param authorId
+    *   Device key of review author
+    */
+  def reviewByAuthor(restroomId: UUID, authorId: String): IO[RepositoryError, Option[Review]]
 
 object RestroomRepository:
   def add(data: AddRestroomData): ZIO[RestroomRepository, RepositoryError, UUID] =
@@ -63,6 +73,13 @@ object RestroomRepository:
 
   def addReview(
     restroomId: UUID,
-    data: AddReviewData
+    data: AddReviewData,
+    authorId: String
   ): ZIO[RestroomRepository, RepositoryError, UUID] =
-    ZIO.serviceWithZIO[RestroomRepository](_.addReview(restroomId, data))
+    ZIO.serviceWithZIO[RestroomRepository](_.addReview(restroomId, data, authorId))
+
+  def reviewByAuthor(
+    restroomId: UUID,
+    authorId: String
+  ): ZIO[RestroomRepository, RepositoryError, Option[Review]] =
+    ZIO.serviceWithZIO[RestroomRepository](_.reviewByAuthor(restroomId, authorId))
