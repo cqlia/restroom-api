@@ -3,7 +3,7 @@ info:
   title: Restroom API
   description: API that allows for listing and reviewing restrooms for some location.
   version: 0.0.1
-servers:
+servers: []
 paths:
   /restrooms:
     get:

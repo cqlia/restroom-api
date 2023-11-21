@@ -11,10 +11,15 @@ An OpenAPI spec is available [here](docs/api.yaml).
 ## Usage
 
 > [!WARNING]
-> There is no moderation functionality built into the API.
+> There is no moderation functionality in the API.
 > Please do not run this as a public application!!
 
-I don't know.
+1. Install PostgreSQL with citext and PostGIS extensions.
+2. Load the [definitions SQL file](src/main/resources/base.sql) from the `resources` directory.
+3. Modify the [reference.conf](src/main/resources/reference.conf) for your setup and rename it to `application.conf`.
+    - Alternatively, a different `application.conf` can be loaded by setting the `config.file` system property.
+4. Assemble the application in the sbt shell by running `assembly`. 
+5. Deploy the assembled application.
 
 ## License
 
