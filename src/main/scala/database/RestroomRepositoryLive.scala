@@ -30,8 +30,20 @@ class RestroomRepositoryLive(connectionPool: ZConnectionPool) extends RestroomRe
 
   // remember that coordinates are in (longitude, latitude) order.
 
-  // INSERT INTO restrooms (title, location) VALUES ('test a', ST_MakePoint(long, lat));
-  override def add(data: AddRestroomData): IO[RepositoryError, UUID] = ZIO.fail(null)
+  override def add(data: AddRestroomData): IO[RepositoryError, UUID] =
+    val effect = transaction {
+      sql"""INSERT INTO restrooms (title, description, location) VALUES (
+           ${data.title}, ${data.description},
+           ST_MakePoint(${data.location.longitude}, ${data.location.latitude})
+           ) RETURNING id;""".insertReturning[UUID]
+    }
+
+    effect
+      .refineOrDie { case e: Throwable =>
+        RepositoryError(e)
+      // this should only ever return one value, if it's missing then something's broken
+      }
+      .map(_.updatedKeys.head)
 
   override def list(around: Location): IO[RepositoryError, List[Restroom]] =
     val effect = transaction {

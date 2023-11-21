@@ -44,11 +44,10 @@ testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
 
 ThisBuild / assemblyMergeStrategy := {
   case PathList("META-INF", xs @ _*) =>
-    (xs map {_.toLowerCase}) match {
+    xs map { _.toLowerCase } match {
       case "services" :: xs =>
         MergeStrategy.filterDistinctLines
       case _ => MergeStrategy.discard
     }
   case x => MergeStrategy.deduplicate
 }
-
