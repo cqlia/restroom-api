@@ -10,6 +10,7 @@ object RestroomRepositoryMock extends Mock[RestroomRepository]:
   object Add extends Effect[AddRestroomData, Nothing, UUID]
   object List extends Effect[Location, Nothing, List[Restroom]]
   object ById extends Effect[UUID, Nothing, Option[Restroom]]
+  object ByTitle extends Effect[String, Nothing, Option[Restroom]]
   object Reviews extends Effect[UUID, Nothing, List[Review]]
   object AddReview extends Effect[(UUID, AddReviewData, String), Nothing, UUID]
   object ReviewByAuthor extends Effect[(UUID, String), Nothing, Option[Review]]
@@ -26,6 +27,9 @@ object RestroomRepositoryMock extends Mock[RestroomRepository]:
           proxy(Reviews, restroomId)
 
         override def byId(id: UUID): IO[RepositoryError, Option[Restroom]] = proxy(ById, id)
+
+        override def byTitle(title: String): IO[RepositoryError, Option[Restroom]] =
+          proxy(ByTitle, title)
 
         override def addReview(
           restroomId: UUID,

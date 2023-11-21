@@ -31,6 +31,17 @@ object RestroomServiceSpec extends ZIOSpecDefault:
     value(None)
   )
 
+  private val duplicateRestroomMock: ULayer[RestroomRepository] = RestroomRepositoryMock.ByTitle(
+    anything,
+    value(Some(restroomA))
+  )
+
+  private val addRestroomMock: ULayer[RestroomRepository] = RestroomRepositoryMock.ByTitle(
+    anything,
+    value(None)
+  ) ++ RestroomRepositoryMock.Add(anything, value(restroomA.id))
+    ++ RestroomRepositoryMock.ById(equalTo(restroomA.id), value(Some(restroomA)))
+
   private val duplicateReviewMock: ULayer[RestroomRepository] = RestroomRepositoryMock.ById(
     equalTo(restroomA.id),
     value(Some(restroomA))
@@ -58,6 +69,22 @@ object RestroomServiceSpec extends ZIOSpecDefault:
             .exit
         } yield assert(result)(fails(equalTo(NotFoundError())))
       }.provide(RestroomServiceLive.layer, getMissingMock)
+    ),
+    suite("restroom creation")(
+      test("duplicate restroom") {
+        for {
+          result <- RestroomService
+            .add(AddRestroomData(restroomA.title, None, restroomA.location))
+            .either
+        } yield assertTrue(result == Right(restroomA))
+      }.provide(RestroomServiceLive.layer, duplicateRestroomMock),
+      test("success path") {
+        for {
+          result <- RestroomService
+            .add(AddRestroomData(restroomA.title, None, restroomA.location))
+            .either
+        } yield assertTrue(result == Right(restroomA))
+      }.provide(RestroomServiceLive.layer, addRestroomMock)
     ),
     suite("review creation")(
       test("duplicate review") {

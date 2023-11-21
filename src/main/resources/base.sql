@@ -1,8 +1,9 @@
 CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS citext;
 
 CREATE TABLE IF NOT EXISTS restrooms (
     id uuid PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
-    title text NOT NULL,
+    title citext NOT NULL UNIQUE,
     location geometry(POINT, 4326) NOT NULL,
     description text
 );

@@ -24,6 +24,13 @@ trait RestroomRepository:
     around: Location
   ): IO[RepositoryError, List[Restroom]]
 
+  /** Fetches a restroom from its case sensitive title.
+    *
+    * @param title
+    *   Reference title for restroom
+    */
+  def byTitle(title: String): IO[RepositoryError, Option[Restroom]]
+
   /** Fetches a restroom from its UUID.
     * @param id
     *   Reference UUID for restroom
@@ -67,6 +74,9 @@ object RestroomRepository:
 
   def byId(id: UUID): ZIO[RestroomRepository, RepositoryError, Option[Restroom]] =
     ZIO.serviceWithZIO[RestroomRepository](_.byId(id))
+
+  def byTitle(title: String): ZIO[RestroomRepository, RepositoryError, Option[Restroom]] =
+    ZIO.serviceWithZIO[RestroomRepository](_.byTitle(title))
 
   def reviews(restroomId: UUID): ZIO[RestroomRepository, RepositoryError, List[Review]] =
     ZIO.serviceWithZIO[RestroomRepository](_.reviews(restroomId))

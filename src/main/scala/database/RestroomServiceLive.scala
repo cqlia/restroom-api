@@ -11,11 +11,16 @@ class RestroomServiceLive(restroomRepository: RestroomRepository) extends Restro
   def add(data: AddRestroomData): IO[DomainError, Restroom] =
     if (!data.location.inBounds) ZIO.fail(RequestError("location out of bounds"))
     else
-      for {
-        id <- restroomRepository.add(data)
-        restroom <- restroomRepository.byId(id)
-        // if this returns null, something has gone really wrong
-      } yield restroom.get
+      restroomRepository
+        .byTitle(data.title)
+        .flatMap(
+          _.fold(
+            restroomRepository
+              .add(data)
+              .flatMap(id => restroomRepository.byId(id))
+              .map(_.get)
+          )(ZIO.succeed(_))
+        )
 
   def list(around: Location): IO[DomainError, List[Restroom]] =
     if (!around.inBounds) ZIO.fail(RequestError("location out of bounds"))

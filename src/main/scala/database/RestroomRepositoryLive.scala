@@ -108,6 +108,24 @@ class RestroomRepositoryLive(connectionPool: ZConnectionPool) extends RestroomRe
       }
       .map(_.map(tupleToRestroom))
 
+  override def byTitle(title: String): IO[RepositoryError, Option[Restroom]] =
+    val effect = transaction {
+      // this is a one-off function, but having 0 as distance is not the most ideal
+      sql"""SELECT restrooms.id, title, description,
+          COALESCE(AVG(reviews.rating), 0) AS reviewAverage,
+          ST_X(location) as longitude, ST_Y(location) as latitude, NULL AS distance
+          FROM restrooms LEFT JOIN reviews ON restrooms.id = reviews.restroom_id
+          WHERE restrooms.title = $title GROUP BY restrooms.id"""
+        .query[UnpackedRestroom]
+        .selectOne
+    }
+
+    effect
+      .refineOrDie { case e: Throwable =>
+        RepositoryError(e)
+      }
+      .map(_.map(tupleToRestroom))
+
   override def addReview(
     restroomId: UUID,
     data: AddReviewData,
