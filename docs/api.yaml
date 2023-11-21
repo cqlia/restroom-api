@@ -105,12 +105,8 @@ paths:
             schema:
               $ref: "#/components/schemas/Review"
       responses:
-        "200":
+        "204":
           description: "Success response"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Review"
         "400":
           description: "Missing parameters"
         "404":
@@ -164,7 +160,6 @@ components:
         - title
         - location
         - review_average
-        - distance
       properties:
         id:
           type: string

@@ -8,16 +8,17 @@ import java.util.UUID
 import models.*
 
 class RestroomServiceLive(restroomRepository: RestroomRepository) extends RestroomService:
-  def add(data: AddRestroomData): IO[DomainError, UUID] =
-    restroomRepository.add(data)
+  def add(data: AddRestroomData): IO[DomainError, Restroom] =
+    if (!data.location.inBounds) ZIO.fail(RequestError("location out of bounds"))
+    else
+      for {
+        id <- restroomRepository.add(data)
+        restroom <- restroomRepository.byId(id)
+        // if this returns null, something has gone really wrong
+      } yield restroom.get
 
   def list(around: Location): IO[DomainError, List[Restroom]] =
-    if (
-      around.longitude > 180
-      || around.longitude < -180.0
-      || around.latitude > 90
-      || around.latitude < -90
-    ) ZIO.fail(RequestError("location out of bounds"))
+    if (!around.inBounds) ZIO.fail(RequestError("location out of bounds"))
     else restroomRepository.list(around)
 
   override def reviews(restroomId: UUID): IO[DomainError, List[Review]] =
@@ -27,6 +28,16 @@ class RestroomServiceLive(restroomRepository: RestroomRepository) extends Restro
       onTrue = restroomRepository.reviews(restroomId),
       onFalse = ZIO.fail(NotFoundError())
     )
+
+  override def addReview(restroomId: UUID, data: AddReviewData): IO[DomainError, UUID] =
+    if (data.rating > 5 || data.rating < 0) ZIO.fail(RequestError("rating out of bounds"))
+    else
+      ZIO.ifZIO(
+        restroomRepository.byId(restroomId).map(_.isDefined)
+      )(
+        onTrue = restroomRepository.addReview(restroomId, data),
+        onFalse = ZIO.fail(NotFoundError())
+      )
 
 object RestroomServiceLive:
   val layer: URLayer[RestroomRepository, RestroomService] = ZLayer(

@@ -5,8 +5,6 @@ import zio._
 
 import java.util.UUID
 
-final case class AddRestroomData(title: String, description: Option[String], location: Location)
-
 trait RestroomRepository:
   /** Adds a new restroom to the repository.
     *
@@ -38,6 +36,16 @@ trait RestroomRepository:
     */
   def reviews(restroomId: UUID): IO[RepositoryError, List[Review]]
 
+  /** Adds a new review for a restroom in the repository.
+    * @param restroomId
+    *   Reference UUID for restroom
+    * @param data
+    *   Information describing the review to be added
+    * @return
+    *   UUID of the created review
+    */
+  def addReview(restroomId: UUID, data: AddReviewData): IO[RepositoryError, UUID]
+
 object RestroomRepository:
   def add(data: AddRestroomData): ZIO[RestroomRepository, RepositoryError, UUID] =
     ZIO.serviceWithZIO[RestroomRepository](_.add(data))
@@ -52,3 +60,9 @@ object RestroomRepository:
 
   def reviews(restroomId: UUID): ZIO[RestroomRepository, RepositoryError, List[Review]] =
     ZIO.serviceWithZIO[RestroomRepository](_.reviews(restroomId))
+
+  def addReview(
+    restroomId: UUID,
+    data: AddReviewData
+  ): ZIO[RestroomRepository, RepositoryError, UUID] =
+    ZIO.serviceWithZIO[RestroomRepository](_.addReview(restroomId, data))

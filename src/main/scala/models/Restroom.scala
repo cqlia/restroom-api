@@ -10,7 +10,7 @@ final case class Restroom(
   title: String,
   description: Option[String],
   location: Location,
-  distance: Double,
+  distance: Option[Double],
   @jsonField("review_average")
   reviewAverage: Float
 )
@@ -18,3 +18,8 @@ final case class Restroom(
 object Restroom:
   implicit val decoder: JsonDecoder[Restroom] = DeriveJsonDecoder.gen[Restroom]
   implicit val encoder: JsonEncoder[Restroom] = DeriveJsonEncoder.gen[Restroom]
+
+final case class AddRestroomData(title: String, description: Option[String], location: Location)
+object AddRestroomData:
+  implicit val decoder: JsonDecoder[AddRestroomData] = DeriveJsonDecoder.gen[AddRestroomData]
+  implicit val encoder: JsonEncoder[AddRestroomData] = DeriveJsonEncoder.gen[AddRestroomData]

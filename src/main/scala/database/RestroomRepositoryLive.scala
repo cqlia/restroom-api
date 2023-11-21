@@ -10,29 +10,6 @@ import java.util.UUID
 
 import models.*
 
-case class DbRestroom(
-  id: String,
-  title: String,
-  description: Option[String],
-  reviewAverage: Float,
-  longitude: Double,
-  latitude: Double,
-  distance: Double
-)
-
-object DbRestroom:
-  def asRestroom(x: DbRestroom): Restroom = Restroom(
-    id = UUID.fromString(x.id),
-    title = x.title,
-    description = x.description,
-    location = Location(
-      latitude = x.latitude,
-      longitude = x.longitude
-    ),
-    distance = x.distance,
-    reviewAverage = x.reviewAverage
-  )
-
 class RestroomRepositoryLive(quill: Quill.Postgres[Literal]) extends RestroomRepository:
   import quill.*
 
@@ -89,9 +66,9 @@ class RestroomRepositoryLive(quill: Quill.Postgres[Literal]) extends RestroomRep
         // this is a one-off function, but having 0 as distance is not the most ideal
         sql"""SELECT restrooms.id, title, description,
             COALESCE(AVG(reviews.rating), 0) AS reviewAverage,
-            ST_X(location) as longitude, ST_Y(location) as latitude, 0.0 AS distance
+            ST_X(location) as longitude, ST_Y(location) as latitude, NULL AS distance
             FROM restrooms LEFT JOIN reviews ON restrooms.id = reviews.restroom_id
-            WHERE restrooms.id = ${lift(id)} GROUP BY restrooms.id ORDER BY distance"""
+            WHERE restrooms.id = ${lift(id)} GROUP BY restrooms.id"""
           .as[Query[Restroom]]
       }
     }
@@ -101,6 +78,9 @@ class RestroomRepositoryLive(quill: Quill.Postgres[Literal]) extends RestroomRep
       .refineOrDie { case e: SQLException =>
         RepositoryError(e)
       }
+
+  override def addReview(restroomId: UUID, data: AddReviewData): IO[RepositoryError, UUID] =
+    ZIO.fail(null)
 
 object RestroomRepositoryLive:
   val layer: URLayer[Quill.Postgres[Literal], RestroomRepository] = ZLayer {

@@ -11,6 +11,7 @@ object RestroomRepositoryMock extends Mock[RestroomRepository]:
   object List extends Effect[Location, Nothing, List[Restroom]]
   object ById extends Effect[UUID, Nothing, Option[Restroom]]
   object Reviews extends Effect[UUID, Nothing, List[Review]]
+  object AddReview extends Effect[(UUID, AddReviewData), Nothing, UUID]
 
   override val compose: URLayer[Proxy, RestroomRepository] =
     ZLayer.fromFunction((proxy: Proxy) =>
@@ -24,5 +25,8 @@ object RestroomRepositoryMock extends Mock[RestroomRepository]:
           proxy(Reviews, restroomId)
 
         override def byId(id: UUID): IO[RepositoryError, Option[Restroom]] = proxy(ById, id)
+
+        override def addReview(restroomId: UUID, data: AddReviewData): IO[RepositoryError, UUID] =
+          proxy(AddReview, (restroomId, data))
       }
     )

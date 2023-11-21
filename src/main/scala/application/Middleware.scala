@@ -16,3 +16,11 @@ def apiKeyMiddleware = customAuthZIO(r =>
     case Some(value) => value.renderedValue == apiKey
     case _           => false
 )
+
+final case class DeviceKeyContext(key: String)
+def deviceKeyMiddleware = HandlerAspect.customAuthProviding[DeviceKeyContext] { r =>
+  r.headers.get(Header.Authorization).flatMap {
+    case Header.Authorization.Bearer(token) => Some(DeviceKeyContext(token))
+    case _                                  => None
+  }
+}
