@@ -1,7 +1,9 @@
 package app
 package models
 
+import zio.jdbc.*
 import zio.json.*
+import zio.schema.*
 
 import java.util.UUID
 
@@ -14,6 +16,10 @@ final case class Review(
 object Review:
   implicit val decoder: JsonDecoder[Review] = DeriveJsonDecoder.gen[Review]
   implicit val encoder: JsonEncoder[Review] = DeriveJsonEncoder.gen[Review]
+
+  implicit val schema: Schema[Review] = DeriveSchema.gen[Review]
+  implicit val jdbcDecoder: JdbcDecoder[Review] = JdbcDecoder.fromSchema
+  implicit val jdbcEncoder: JdbcEncoder[Review] = JdbcEncoder.fromSchema
 
 final case class AddReviewData(
   rating: Float,

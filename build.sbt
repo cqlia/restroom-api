@@ -19,6 +19,7 @@ lazy val root = (project in file("."))
 val zioVersion = "2.0.19"
 val zioLoggingVersion = "2.1.15"
 val zioConfigVersion = "4.0.0-RC16"
+val zioSchemaVersion = "0.4.15"
 
 libraryDependencies ++= Seq(
   "dev.zio" %% "zio" % zioVersion,
@@ -30,8 +31,10 @@ libraryDependencies ++= Seq(
   "dev.zio" %% "zio-config" % zioConfigVersion,
   "dev.zio" %% "zio-config-magnolia" % zioConfigVersion,
   "dev.zio" %% "zio-config-typesafe" % zioConfigVersion,
-  "io.getquill" %% "quill-jdbc-zio" % "4.8.0",
+  "dev.zio" %% "zio-jdbc" % "0.1.1",
   "org.postgresql" % "postgresql" % "42.6.0",
+  "dev.zio" %% "zio-schema" % zioSchemaVersion,
+  "dev.zio" %% "zio-schema-derivation" % zioSchemaVersion,
   "dev.zio" %% "zio-test" % zioVersion % Test,
   "dev.zio" %% "zio-test-sbt" % zioVersion % Test,
   "dev.zio" %% "zio-mock" % "1.0.0-RC11" % Test
@@ -46,6 +49,6 @@ ThisBuild / assemblyMergeStrategy := {
         MergeStrategy.filterDistinctLines
       case _ => MergeStrategy.discard
     }
-  case x => MergeStrategy.first
+  case x => MergeStrategy.deduplicate
 }
 

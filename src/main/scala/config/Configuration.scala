@@ -11,3 +11,15 @@ object Configuration:
 
   object ApiConfig:
     val config: Config[ApiConfig] = deriveConfig[ApiConfig].nested("api")
+
+  final case class DbConfig(
+    user: String,
+    databaseName: String,
+    password: String,
+    portNumber: Int,
+    serverName: String
+  )
+
+  object DbConfig:
+    val config: Config[DbConfig] = deriveConfig[DbConfig]
+      .nested("db")
