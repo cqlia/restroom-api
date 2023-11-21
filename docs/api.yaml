@@ -4,8 +4,6 @@ info:
   description: API that allows for listing and reviewing restrooms for some location.
   version: 0.0.1
 servers:
-  - url: 'http://localhost:8080'
-    description: "Testing server"
 paths:
   /restrooms:
     get:
