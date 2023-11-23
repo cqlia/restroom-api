@@ -61,7 +61,7 @@ object RestroomServiceSpec extends ZIOSpecDefault:
       test("invalid location") {
         for {
           result <- RestroomService.list(Location(0.0, 1000.0)).exit
-        } yield assert(result)(fails(equalTo(RequestError("location out of bounds"))))
+        } yield assert(result)(fails(equalTo(RequestError.InvalidLocation)))
       }.provide(RestroomServiceLive.layer, RestroomRepositoryMock.empty)
     ),
     suite("review listing")(
@@ -94,7 +94,7 @@ object RestroomServiceSpec extends ZIOSpecDefault:
           result <- RestroomService
             .add(AddRestroomData(invalidTitle, None, restroomA.location))
             .either
-        } yield assertTrue(result == Left(RequestError("Title is too long")))
+        } yield assertTrue(result == Left(RequestError.TitleLength))
       }.provide(RestroomServiceLive.layer, RestroomRepositoryMock.empty)
     ),
     suite("review creation")(
@@ -103,7 +103,7 @@ object RestroomServiceSpec extends ZIOSpecDefault:
           result <- RestroomService
             .addReview(restroomA.id, AddReviewData(5.0, None), "example-id")
             .exit
-        } yield assert(result)(fails(equalTo(RequestError("User already created review"))))
+        } yield assert(result)(fails(equalTo(RequestError.DuplicateReview)))
       }.provide(RestroomServiceLive.layer, duplicateReviewMock),
       test("invalid restroom") {
         for {
@@ -117,7 +117,7 @@ object RestroomServiceSpec extends ZIOSpecDefault:
           result <- RestroomService
             .addReview(restroomA.id, AddReviewData(10.0, None), "example-id")
             .exit
-        } yield assert(result)(fails(equalTo(RequestError("rating out of bounds"))))
+        } yield assert(result)(fails(equalTo(RequestError.InvalidRating)))
       }.provide(RestroomServiceLive.layer, RestroomRepositoryMock.empty),
       test("add review successful") {
         for {

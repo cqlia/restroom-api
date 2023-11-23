@@ -24,7 +24,7 @@ object RestroomRoutes:
               handleError,
               r => ZIO.succeed(Response.json(r.toJson))
             )
-          case _ => handleError(RequestError("missing parameters"))
+          case _ => handleError(RequestError.MissingLocation)
       },
     Method.POST / "restrooms" -> deviceKeyMiddleware ->
       Handler.fromFunctionZIO[(DeviceKeyContext, Request)] { case (context, request) =>
@@ -76,7 +76,7 @@ object RestroomRoutes:
       )
     )
     .refineOrDie { (e: Throwable) =>
-      RequestError("invalid body")
+      RequestError.InvalidBody
     }
 
   private def parseUUID(value: String): Option[UUID] = try Some(UUID.fromString(value))
