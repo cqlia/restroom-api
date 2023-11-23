@@ -84,7 +84,15 @@ object RestroomServiceSpec extends ZIOSpecDefault:
             .add(AddRestroomData(restroomA.title, None, restroomA.location))
             .either
         } yield assertTrue(result == Right(restroomA))
-      }.provide(RestroomServiceLive.layer, addRestroomMock)
+      }.provide(RestroomServiceLive.layer, addRestroomMock),
+      test("invalid title") {
+        val invalidTitle = "x".repeat(257);
+        for {
+          result <- RestroomService
+            .add(AddRestroomData(invalidTitle, None, restroomA.location))
+            .either
+        } yield assertTrue(result == Left(RequestError("Title is too long")))
+      }.provide(RestroomServiceLive.layer, RestroomRepositoryMock.empty)
     ),
     suite("review creation")(
       test("duplicate review") {

@@ -11,7 +11,7 @@ An OpenAPI spec is available [here](docs/api.yaml).
 ## Usage
 
 > [!WARNING]
-> There is no moderation functionality in the API.
+> There is no moderation functionality in the API.  
 > Please do not run this as a public application!!
 
 1. Install PostgreSQL with citext and PostGIS extensions.

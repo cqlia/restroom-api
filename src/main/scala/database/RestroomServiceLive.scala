@@ -10,6 +10,7 @@ import models.*
 class RestroomServiceLive(restroomRepository: RestroomRepository) extends RestroomService:
   def add(data: AddRestroomData): IO[DomainError, Restroom] =
     if (!data.location.inBounds) ZIO.fail(RequestError("location out of bounds"))
+    else if (data.title.length > 256) ZIO.fail(RequestError("Title is too long"))
     else
       restroomRepository
         .byTitle(data.title)
