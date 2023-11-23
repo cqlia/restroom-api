@@ -202,7 +202,7 @@ components:
           type: string
           format: date-time
           readOnly: true
-          description: Creation time of review in ISO8601 format, with fractional sections.
+          description: Creation time of review in ISO8601 format, with fractional seconds.
           example: "2023-11-23T04:05:53.273179Z"
 
 security:
