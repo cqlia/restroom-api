@@ -25,7 +25,8 @@ object RestroomServiceSpec extends ZIOSpecDefault:
     description = None,
     distance = Some(0.1),
     location = Location(25.0, 15.0),
-    reviewAverage = 5.0
+    reviewAverage = 3.3,
+    reviewCount = 0
   )
 
   private val getMissingMock: ULayer[RestroomRepository] = RestroomRepositoryMock.ById(

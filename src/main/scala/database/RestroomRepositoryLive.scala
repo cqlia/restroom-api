@@ -11,7 +11,7 @@ import java.util.UUID
 import models.*
 
 // schema methods seem a little broken currently, so manual it is
-type UnpackedRestroom = (UUID, String, Option[String], Float, Double, Double, Option[Double])
+type UnpackedRestroom = (UUID, String, Option[String], Float, Double, Double, Option[Double], Int)
 private def tupleToRestroom(t: UnpackedRestroom): Restroom = Restroom(
   id = t._1,
   title = t._2,
@@ -21,7 +21,8 @@ private def tupleToRestroom(t: UnpackedRestroom): Restroom = Restroom(
     longitude = t._5,
     latitude = t._6
   ),
-  distance = t._7
+  distance = t._7,
+  reviewCount = t._8
 )
 
 type UnpackedReview = (UUID, Float, Option[String], ZonedDateTime)
@@ -66,7 +67,8 @@ class RestroomRepositoryLive(connectionPool: ZConnectionPool) extends RestroomRe
                      ),
                      4326),
                    3857)
-                  ) * cosd(ST_Y(location)) * 0.0006213712 AS distance
+                  ) * cosd(ST_Y(location)) * 0.0006213712 AS distance,
+                  COALESCE(COUNT(reviews), 0) AS reviewCount
            FROM restrooms LEFT JOIN reviews ON restrooms.id = reviews.restroom_id
            GROUP BY restrooms.id ORDER BY distance"""
         .query[UnpackedRestroom]
@@ -96,7 +98,8 @@ class RestroomRepositoryLive(connectionPool: ZConnectionPool) extends RestroomRe
     val effect = transaction {
       sql"""SELECT restrooms.id, title, description,
           COALESCE(AVG(reviews.rating), 0) AS reviewAverage,
-          ST_X(location) as longitude, ST_Y(location) as latitude, NULL AS distance
+          ST_X(location) as longitude, ST_Y(location) as latitude,
+          NULL AS distance, COALESCE(COUNT(reviews), 0) AS reviewCount
           FROM restrooms LEFT JOIN reviews ON restrooms.id = reviews.restroom_id
           WHERE restrooms.id = $id GROUP BY restrooms.id"""
         .query[UnpackedRestroom]
@@ -113,7 +116,8 @@ class RestroomRepositoryLive(connectionPool: ZConnectionPool) extends RestroomRe
     val effect = transaction {
       sql"""SELECT restrooms.id, title, description,
           COALESCE(AVG(reviews.rating), 0) AS reviewAverage,
-          ST_X(location) as longitude, ST_Y(location) as latitude, NULL AS distance
+          ST_X(location) as longitude, ST_Y(location) as latitude,
+          NULL AS distance, COALESCE(COUNT(reviews), 0) AS reviewCount
           FROM restrooms LEFT JOIN reviews ON restrooms.id = reviews.restroom_id
           WHERE restrooms.title = $title GROUP BY restrooms.id"""
         .query[UnpackedRestroom]

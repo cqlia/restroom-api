@@ -23,7 +23,8 @@ object RestroomRoutesSpec extends ZIOSpecDefault:
     description = None,
     distance = Some(0.1),
     location = Location(25.0, 15.0),
-    reviewAverage = 5.0
+    reviewAverage = 2.3,
+    reviewCount = 3
   )
 
   private val reviewA = Review(

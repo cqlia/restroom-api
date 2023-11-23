@@ -158,6 +158,7 @@ components:
         - title
         - location
         - review_average
+        - review_count
       properties:
         id:
           type: string
@@ -170,6 +171,9 @@ components:
           $ref: "#/components/schemas/Location"
         review_average:
           $ref: "#/components/schemas/Rating"
+          readOnly: true
+        review_count:
+          type: integer
           readOnly: true
         distance:
           type: number

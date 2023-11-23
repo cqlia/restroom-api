@@ -14,7 +14,9 @@ final case class Restroom(
   location: Location,
   distance: Option[Double],
   @jsonField("review_average")
-  reviewAverage: Float
+  reviewAverage: Float,
+  @jsonField("review_count")
+  reviewCount: Int
 )
 
 object Restroom:
