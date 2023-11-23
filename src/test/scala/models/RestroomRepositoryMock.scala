@@ -6,6 +6,8 @@ import zio.mock.*
 
 import java.util.UUID
 
+import application.RestroomRepository
+
 object RestroomRepositoryMock extends Mock[RestroomRepository]:
   object Add extends Effect[AddRestroomData, Nothing, UUID]
   object List extends Effect[Location, Nothing, List[Restroom]]

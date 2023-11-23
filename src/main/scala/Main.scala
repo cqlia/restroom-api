@@ -1,7 +1,5 @@
 package app
 
-import app.config.Configuration.ApiConfig
-import app.config.Configuration.DbConfig
 import com.typesafe.config.ConfigFactory
 import zio.*
 import zio.config.typesafe.TypesafeConfigProvider
@@ -14,7 +12,8 @@ import java.io.File
 
 import api.{BaseRoutes, RestroomRoutes}
 import database.{RestroomRepositoryLive, RestroomServiceLive}
-import application.*
+import application.Configuration.{ApiConfig, DbConfig}
+import application.Middleware.*
 
 object Main extends ZIOAppDefault:
   private val configProvider: ConfigProvider = TypesafeConfigProvider.fromTypesafeConfig(

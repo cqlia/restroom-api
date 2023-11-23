@@ -1,10 +1,9 @@
 package app
-package config
+package application
 
 import zio.*
 import zio.config.*
-
-import magnolia.*
+import zio.config.magnolia.*
 
 object Configuration:
   final case class ApiConfig(host: String, port: Int, apiKey: String)

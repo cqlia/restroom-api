@@ -1,9 +1,11 @@
 package app
-package models
+package application
 
 import zio.*
 
 import java.util.UUID
+
+import models.*
 
 trait RestroomService:
   def add(data: AddRestroomData): IO[DomainError, Restroom]

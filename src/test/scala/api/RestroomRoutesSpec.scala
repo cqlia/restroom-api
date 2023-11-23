@@ -15,6 +15,7 @@ import java.util.UUID
 
 import database.RestroomServiceMock
 import models.*
+import application.RestroomService
 
 object RestroomRoutesSpec extends ZIOSpecDefault:
   private val restroomA = Restroom(

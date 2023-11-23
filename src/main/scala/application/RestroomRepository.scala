@@ -1,9 +1,11 @@
 package app
-package models
+package application
 
-import zio._
+import zio.*
 
 import java.util.UUID
+
+import models.*
 
 trait RestroomRepository:
   /** Adds a new restroom to the repository.

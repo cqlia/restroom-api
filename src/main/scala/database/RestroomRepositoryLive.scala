@@ -9,6 +9,7 @@ import java.time.ZonedDateTime
 import java.util.UUID
 
 import models.*
+import application.RestroomRepository
 
 // schema methods seem a little broken currently, so manual it is
 type UnpackedRestroom = (UUID, String, Option[String], Float, Double, Double, Option[Double], Int)
