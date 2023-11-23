@@ -5,12 +5,15 @@ import zio.jdbc.*
 import zio.json.*
 import zio.schema.*
 
+import java.time.ZonedDateTime
 import java.util.UUID
 
 final case class Review(
   id: UUID,
   rating: Float,
-  body: Option[String]
+  body: Option[String],
+  @jsonField("created_at")
+  createdAt: ZonedDateTime
 )
 
 object Review:

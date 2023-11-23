@@ -194,6 +194,10 @@ components:
           $ref: "#/components/schemas/Rating"
         body:
           type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
 
 security:
   - api_key_auth: []

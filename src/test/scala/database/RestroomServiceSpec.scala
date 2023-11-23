@@ -6,6 +6,7 @@ import zio.mock.Expectation.*
 import zio.test.Assertion.*
 import zio.test.*
 
+import java.time.ZonedDateTime
 import java.util.UUID
 
 import models.*
@@ -14,7 +15,8 @@ object RestroomServiceSpec extends ZIOSpecDefault:
   private val reviewA = Review(
     id = UUID.fromString("fef3f44a-75bb-45e9-a2e1-2720e07fbcc3"),
     rating = 5.0,
-    body = None
+    body = None,
+    createdAt = ZonedDateTime.now()
   )
 
   private val restroomA = Restroom(
@@ -86,7 +88,7 @@ object RestroomServiceSpec extends ZIOSpecDefault:
         } yield assertTrue(result == Right(restroomA))
       }.provide(RestroomServiceLive.layer, addRestroomMock),
       test("invalid title") {
-        val invalidTitle = "x".repeat(257);
+        val invalidTitle = "x".repeat(257)
         for {
           result <- RestroomService
             .add(AddRestroomData(invalidTitle, None, restroomA.location))

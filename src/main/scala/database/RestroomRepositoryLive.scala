@@ -5,6 +5,7 @@ import zio.*
 import zio.jdbc.*
 
 import java.sql.SQLException
+import java.time.ZonedDateTime
 import java.util.UUID
 
 import models.*
@@ -23,11 +24,12 @@ private def tupleToRestroom(t: UnpackedRestroom): Restroom = Restroom(
   distance = t._7
 )
 
-type UnpackedReview = (UUID, Float, Option[String])
+type UnpackedReview = (UUID, Float, Option[String], ZonedDateTime)
 private def tupleToReview(r: UnpackedReview): Review = Review(
   id = r._1,
   rating = r._2,
-  body = r._3
+  body = r._3,
+  createdAt = r._4
 )
 
 class RestroomRepositoryLive(connectionPool: ZConnectionPool) extends RestroomRepository:
@@ -79,7 +81,7 @@ class RestroomRepositoryLive(connectionPool: ZConnectionPool) extends RestroomRe
 
   override def reviews(restroomId: UUID): IO[RepositoryError, List[Review]] =
     val effect = transaction {
-      sql"SELECT id, rating, body FROM reviews WHERE restroom_id = $restroomId ORDER BY created_at DESC"
+      sql"SELECT id, rating, body, created_at FROM reviews WHERE restroom_id = $restroomId ORDER BY created_at DESC"
         .query[UnpackedReview]
         .selectAll
     }
@@ -146,7 +148,7 @@ class RestroomRepositoryLive(connectionPool: ZConnectionPool) extends RestroomRe
     authorId: String
   ): IO[RepositoryError, Option[Review]] =
     val effect = transaction {
-      sql"""SELECT id, rating, body FROM reviews WHERE restroom_id = $restroomId AND created_by = $authorId;"""
+      sql"""SELECT id, rating, body, created_at FROM reviews WHERE restroom_id = $restroomId AND created_by = $authorId;"""
         .query[UnpackedReview]
         .selectOne
     }
