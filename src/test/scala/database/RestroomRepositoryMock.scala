@@ -1,12 +1,12 @@
 package app
-package models
+package database
 
 import zio.*
 import zio.mock.*
 
 import java.util.UUID
 
-import application.RestroomRepository
+import models.*
 
 object RestroomRepositoryMock extends Mock[RestroomRepository]:
   object Add extends Effect[AddRestroomData, Nothing, UUID]

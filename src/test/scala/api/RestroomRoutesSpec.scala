@@ -13,9 +13,8 @@ import zio.test.*
 import java.time.ZonedDateTime
 import java.util.UUID
 
-import database.RestroomServiceMock
+import database.{RestroomService, RestroomServiceMock}
 import models.*
-import application.RestroomService
 
 object RestroomRoutesSpec extends ZIOSpecDefault:
   private val restroomA = Restroom(

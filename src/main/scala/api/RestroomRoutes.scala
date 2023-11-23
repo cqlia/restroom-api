@@ -8,7 +8,7 @@ import zio.json.*
 import java.util.UUID
 
 import application.Middleware.*
-import application.RestroomService
+import database.RestroomService
 import models.*
 
 object RestroomRoutes:

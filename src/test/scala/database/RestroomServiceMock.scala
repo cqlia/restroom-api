@@ -7,7 +7,6 @@ import zio.mock.*
 import java.util.UUID
 
 import models.*
-import application.RestroomService
 
 object RestroomServiceMock extends Mock[RestroomService]:
   object Add extends Effect[AddRestroomData, Nothing, Restroom]

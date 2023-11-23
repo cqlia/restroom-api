@@ -1,5 +1,5 @@
 package app
-package application
+package database
 
 import zio.*
 

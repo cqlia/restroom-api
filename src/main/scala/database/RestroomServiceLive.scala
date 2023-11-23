@@ -6,7 +6,6 @@ import zio.*
 import java.util.UUID
 
 import models.*
-import application.{RestroomRepository, RestroomService}
 
 class RestroomServiceLive(restroomRepository: RestroomRepository) extends RestroomService:
   def add(data: AddRestroomData): IO[DomainError, Restroom] =

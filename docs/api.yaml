@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Restroom API
   description: API that allows for listing and reviewing restrooms for some location.
-  version: 0.0.1
+  version: 1.0.0
 servers: []
 paths:
   /restrooms:
@@ -202,6 +202,8 @@ components:
           type: string
           format: date-time
           readOnly: true
+          description: Creation time of review in ISO8601 format, with fractional sections.
+          example: "2023-11-23T04:05:53.273179Z"
 
 security:
   - api_key_auth: []

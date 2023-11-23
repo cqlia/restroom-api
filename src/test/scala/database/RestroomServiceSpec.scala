@@ -9,7 +9,6 @@ import zio.test.*
 import java.time.ZonedDateTime
 import java.util.UUID
 
-import application.{RestroomRepository, RestroomService}
 import models.*
 
 object RestroomServiceSpec extends ZIOSpecDefault:
